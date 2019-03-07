@@ -25,7 +25,7 @@ processes = []
 
 def get_channel():
     global channel_url
-    channel_url = "twitch.tv/CHANNELNAME"
+    channel_url = "http://twitch.tv/rjfreakingburger"
 
 
 def get_proxies():
