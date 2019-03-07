@@ -26,7 +26,7 @@ processes = []
 
 def get_channel():
     global channel_url
-    channel_url = "https://twitch.tv/kevjrobbo"
+    channel_url = "https://twitch.tv/beardybenj"
 
 
 def get_proxies():
@@ -47,9 +47,7 @@ def get_proxies():
 
 def get_url():
     try:
-        response = subprocess.Popen(
-            ["livestreamer.exe", "--http-header", "Client-ID=",
-            channel_url, "-j"], stdout=subprocess.PIPE).communicate()[0]
+        response = subprocess.Popen(["livestreamer", "--http-header", "Client-ID=", channel_url, "-j"], stdout=subprocess.PIPE).communicate()[0]
     except subprocess.CalledProcessError:
         print ("An error has occurred while trying to get the stream data. Is the channel online? Is the channel name correct?")
         sys.exit(1)
@@ -57,10 +55,10 @@ def get_url():
         print ("An error has occurred while trying to use livestreamer package. Is it installed? Do you have Python in your PATH variable?")
  
     try:
-        url = json.loads(response)['streams']['audio_only']['url']
+        url = json.loads(response)['streams']['worst']['url']
     except:
         try:
-            url = json.loads(response)['streams']['worst']['url']
+            url = json.loads(response)['streams']['audio_only']['url']
         except (ValueError, KeyError):
             print ("An error has occurred while trying to get the stream data. Is the channel online? Is the channel name correct?")
             sys.exit(1)
@@ -76,7 +74,7 @@ def open_url(url, proxy):
                 response = s.head(url, proxies=proxy)
             print("Sent HEAD request with %s" % proxy["http"])
             print(response)
-            time.sleep(20)
+            time.sleep(10)
         except requests.exceptions.Timeout:
             print("  Timeout error for %s" % proxy["http"])
         except requests.exceptions.ConnectionError:
