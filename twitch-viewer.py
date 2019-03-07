@@ -181,6 +181,11 @@ if __name__ == "__main__":
     while True:
         time.sleep(1)
 
-        #If a time is set, lets kill it once times up
+        #If a time is set, lets kill it once times up - 300 = 5mins
         if maxViewBotTime:
-            if time.time() > killTime + maxViewBotTime : break
+            if time.time() > killTime + maxViewBotTime : 
+                print("Viewbot has eneded.")
+                print("Time is %s " % time.time())
+                print("Start Time was %s " % killTime)
+                print("Max View bot time was %s " % maxViewBotTime)
+                break
