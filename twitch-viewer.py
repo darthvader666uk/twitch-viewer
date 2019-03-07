@@ -18,6 +18,7 @@ import sys
 import multiprocessing
 import time
 import random
+from lxml.html import fromstring
 
 channel_url = ""
 processes = []
@@ -30,14 +31,26 @@ def get_channel():
 
 def get_proxies():
     # Reading the list of proxies
-    try:
-        lines = [line.rstrip("\n") for line in open("proxylist.txt")]
-    except IOError as e:
-        print("An error has occurred while trying to read the list of proxies: %s" % e.strerror)
-        sys.exit(1)
+    # try:
+    #     lines = [line.rstrip("\n") for line in open("proxylist.txt")]
+    # except IOError as e:
+    #     print("An error has occurred while trying to read the list of proxies: %s" % e.strerror)
+    #     sys.exit(1)
 
-    return lines
-
+    # return lines
+    url = 'https://free-proxy-list.net/'
+    response = requests.get(url)
+    parser = fromstring(response.text)
+    proxies = set()
+    for i in parser.xpath('//tbody/tr')[:10]:
+        if i.xpath('.//td[2][contains(text(),"80") or contains(text(),"443") or contains(text(),"1935"]'):
+            #Grabbing IP and corresponding PORT
+            proxy = ":".join([i.xpath('.//td[1]/text()')[0], i.xpath('.//td[2]/text()')[0]])
+            proxies.add(proxy)
+            #Check if Proxies are empty
+            if not proxies:
+                proxies = ['46.101.1.221:80', '68.183.220.18:80', '206.189.205.65:80']
+    return proxies
 
 def get_url():
     try:
@@ -75,11 +88,14 @@ def open_url(url, proxy):
             print("  Timeout error for %s" % proxy["http"])
         except requests.exceptions.ConnectionError:
             print("  Connection error for %s" % proxy["http"])
+            print("  Refreshing Proxies ...")
+            prepare_processes()
 
 
 def prepare_processes():
     global processes
     proxies = get_proxies()
+    print(proxies)
     n = 0
 
     if len(proxies) < 1:
