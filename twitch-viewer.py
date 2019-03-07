@@ -23,17 +23,22 @@ import logging
 from lxml.html import fromstring
 from datetime import datetime, timedelta
 
-user = "Sysxx"
-clientid = ""
-processes = []
+def get_channel(args):
+    global user
+    global clientid
+    global processes
+    global noOfProxies
+    clientid = sys.argv[1]
+    user = sys.argv[2]
+    noOfProxies = int(sys.argv[3])
+    processes = []
 
 def get_proxies():
-    # url = 'https://free-proxy-list.net/'
     url = 'https://free-proxy-list.net/uk-proxy.html'
     response = requests.get(url)
     parser = fromstring(response.text)
     proxies = set()
-    for i in parser.xpath('//tbody/tr')[:10]:
+    for i in parser.xpath('//tbody/tr')[:noOfProxies]:
         if i.xpath('.//td[3][contains(text(),"GB")]'):
             #Grabbing IP and corresponding PORT
             proxy = ":".join([i.xpath('.//td[1]/text()')[0], i.xpath('.//td[2]/text()')[0]])
@@ -65,7 +70,7 @@ def get_url():
     return url
 
 
-def open_url(url, proxy):
+def open_url(url, proxy, clientid, user):
     # Sending HEAD requests
     while True:
         try:
@@ -74,7 +79,7 @@ def open_url(url, proxy):
             print("Sent HEAD request with %s" % proxy["http"])
             print(response)
             time.sleep(5)
-            check_viewers = get_viewers()
+            check_viewers = get_viewers(clientid, user)
             print(check_viewers)
             time.sleep(5)
         except requests.exceptions.Timeout:
@@ -101,14 +106,18 @@ def prepare_processes():
             multiprocessing.Process(
                 target=open_url, kwargs={
                     "url": get_url(), "proxy": {
-                        "http": proxy}}))
+                        "http": proxy
+                    }, "clientid" :clientid, "user" : user
+                }
+            )
+        )
 
         print('Preparing .'),
 
     print('')
 
 # THis Section is for logging and checking view count
-def get_viewers():
+def get_viewers(clientid, user):
     url = "https://api.twitch.tv/kraken/streams/"+user+"?client_id="+clientid
     # print(url)
     r = requests.get(url)
@@ -135,6 +144,18 @@ def get_viewers():
 # End Logging
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser('Twitch Bot')
+    parser.add_argument('clientid', help='CLient ID -- Need to make an App in Twitch Developers: https://glass.twitch.tv/console/apps')
+    parser.add_argument('user', help='Twitch Username')
+    parser.add_argument('noOfProxies', help='Specify No. of Proxies. Max 20')
+    args = parser.parse_args()
+
+    clientid = sys.argv[1]
+    user = sys.argv[2]
+    noOfProxies = int(sys.argv[3])
+
+    print("Obtaining the channel...")
+    get_channel(args)
     print("Preparing the processes...")
     prepare_processes()
     print("Prepared the processes")
