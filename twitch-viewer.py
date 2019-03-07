@@ -114,9 +114,8 @@ def prepare_processes():
                 }
             )
         )
-
-        print('Preparing .'),
-
+        print('Preparing View Bot: %s' %n),
+        n += 1
     print('')
 
 # THis Section is for logging and checking view count
@@ -151,11 +150,14 @@ if __name__ == "__main__":
     parser.add_argument('clientid', help='CLient ID -- Need to make an App in Twitch Developers: https://glass.twitch.tv/console/apps')
     parser.add_argument('user', help='Twitch Username')
     parser.add_argument('noOfProxies', help='Specify No. of Proxies. Max 20')
+    parser.add_argument('maxViewBotTime', help='Set a View Bt timeout to stop twitch views')
     args = parser.parse_args()
 
     clientid = sys.argv[1]
     user = sys.argv[2]
     noOfProxies = int(sys.argv[3])
+    maxViewBotTime = int(sys.argv[4])
+    killTime = time.time()
 
     print("Obtaining the channel...")
     get_channel(args)
@@ -178,3 +180,7 @@ if __name__ == "__main__":
     # Running infinitely
     while True:
         time.sleep(1)
+
+        #If a time is set, lets kill it once times up
+        if maxViewBotTime:
+            if time.time() > killTime + maxViewBotTime : break
