@@ -26,24 +26,17 @@ processes = []
 
 def get_channel():
     global channel_url
-    channel_url = "http://twitch.tv/rjfreakingburger"
+    channel_url = "https://twitch.tv/kevjrobbo"
 
 
 def get_proxies():
-    # Reading the list of proxies
-    # try:
-    #     lines = [line.rstrip("\n") for line in open("proxylist.txt")]
-    # except IOError as e:
-    #     print("An error has occurred while trying to read the list of proxies: %s" % e.strerror)
-    #     sys.exit(1)
-
-    # return lines
-    url = 'https://free-proxy-list.net/'
+    # url = 'https://free-proxy-list.net/'
+    url = 'https://free-proxy-list.net/uk-proxy.html'
     response = requests.get(url)
     parser = fromstring(response.text)
     proxies = set()
     for i in parser.xpath('//tbody/tr')[:10]:
-        if i.xpath('.//td[2][contains(text(),"80") or contains(text(),"443") or contains(text(),"1935"]'):
+        if i.xpath('.//td[3][contains(text(),"GB")]'):
             #Grabbing IP and corresponding PORT
             proxy = ":".join([i.xpath('.//td[1]/text()')[0], i.xpath('.//td[2]/text()')[0]])
             proxies.add(proxy)
