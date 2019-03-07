@@ -42,7 +42,7 @@ def get_proxies():
 def get_url():
     try:
         response = subprocess.Popen(
-            ["livestreamer.exe", "--http-header", "Client-ID=ewvlchtxgqq88ru9gmfp1gmyt6h2b93",
+            ["livestreamer.exe", "--http-header", "Client-ID=",
             channel_url, "-j"], stdout=subprocess.PIPE).communicate()[0]
     except subprocess.CalledProcessError:
         print ("An error has occurred while trying to get the stream data. Is the channel online? Is the channel name correct?")
@@ -69,6 +69,7 @@ def open_url(url, proxy):
             with requests.Session() as s:
                 response = s.head(url, proxies=proxy)
             print("Sent HEAD request with %s" % proxy["http"])
+            print(response)
             time.sleep(20)
         except requests.exceptions.Timeout:
             print("  Timeout error for %s" % proxy["http"])
@@ -93,7 +94,7 @@ def prepare_processes():
                     "url": get_url(), "proxy": {
                         "http": proxy}}))
 
-        print('.'),
+        print('Preparing .'),
 
     print('')
 
