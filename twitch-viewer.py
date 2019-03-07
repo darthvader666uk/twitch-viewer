@@ -31,6 +31,9 @@ def get_channel(args):
     clientid = sys.argv[1]
     user = sys.argv[2]
     noOfProxies = int(sys.argv[3])
+    #Make sure it isnt greater than 20 as https://free-proxy-list.net/uk-proxy.html only displays 20
+    if noOfProxies > 20:
+        noOfProxies = 20
     processes = []
 
 def get_proxies():
