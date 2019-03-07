@@ -1,4 +1,4 @@
 requests
 json
-livestreamer
+streamlink
 lxml

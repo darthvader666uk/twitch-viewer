@@ -23,13 +23,9 @@ import logging
 from lxml.html import fromstring
 from datetime import datetime, timedelta
 
-user = "doubleagentsmith"
+user = "Sysxx"
+clientid = ""
 processes = []
-
-def get_channel():
-    global user
-    user = "doubleagentsmith"
-
 
 def get_proxies():
     # url = 'https://free-proxy-list.net/'
@@ -49,12 +45,13 @@ def get_proxies():
 
 def get_url():
     try:
-        response = subprocess.Popen(["livestreamer", "--http-header", "Client-ID=", "https://twitch.tv/"+user, "-j"], stdout=subprocess.PIPE).communicate()[0]
+        response = subprocess.Popen(["streamlink", "--http-header", "Client-ID="+clientid, "https://twitch.tv/"+user, "-j"], stdout=subprocess.PIPE).communicate()[0]
+        # print(response)
     except subprocess.CalledProcessError:
         print ("1 - An error has occurred while trying to get the stream data. Is the channel online? Is the channel name correct?")
         sys.exit(1)
     except OSError:
-        print ("An error has occurred while trying to use livestreamer package. Is it installed? Do you have Python in your PATH variable?")
+        print ("An error has occurred while trying to use streamlink package. Is it installed? Do you have Python in your PATH variable?")
     try:
         url = json.loads(response)['streams']['worst']['url']
     except:
@@ -76,9 +73,10 @@ def open_url(url, proxy):
                 response = s.head(url, proxies=proxy)
             print("Sent HEAD request with %s" % proxy["http"])
             print(response)
+            time.sleep(5)
             check_viewers = get_viewers()
             print(check_viewers)
-            time.sleep(10)
+            time.sleep(5)
         except requests.exceptions.Timeout:
             print("  Timeout error for %s" % proxy["http"])
         except requests.exceptions.ConnectionError:
@@ -111,7 +109,7 @@ def prepare_processes():
 
 # THis Section is for logging and checking view count
 def get_viewers():
-    url = "https://api.twitch.tv/kraken/streams/"+user+"?client_id="
+    url = "https://api.twitch.tv/kraken/streams/"+user+"?client_id="+clientid
     # print(url)
     r = requests.get(url)
     if r.status_code != 200:
@@ -137,9 +135,6 @@ def get_viewers():
 # End Logging
 
 if __name__ == "__main__":
-    print("Obtaining the channel...")
-    get_channel()
-    print("Obtained the channel")
     print("Preparing the processes...")
     prepare_processes()
     print("Prepared the processes")
