@@ -21,11 +21,12 @@ If everything's fine, proceed.
 ## How to Run
 I have setup this script to be ran dynamically via commandline. In order to run it, al you have to do is the following:
 
-`python twitch-viewer.py CLIENT-ID TWITCH-USER NO-OF-PROXIES`
+`python twitch-viewer.py CLIENT-ID TWITCH-USER NO-OF-PROXIES RUNTIME`
 
 - CLIENT-ID: THis is aquired via the Twitch Developer API Dashboard by making a New app (https://glass.twitch.tv/console/apps)
 - TWITCH-USER:  THis is the Twich user you want to run the views against
 - NO-OF-PROXIES: Specify the number of proxies you want to run.  Its currently getting it dynamically via https://free-proxy-list.net/uk-proxy.html and it has a limit of 20
+- RUNTIME: THis is how long you want to scipt to run e.g. 1 hour = 3600, 2 hours 7200, 3 hours = 10800
 
 The "viewers" you get only work through proxy.  The amount of viewers you get equals to the amount of proxies specified.
 
