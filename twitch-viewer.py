@@ -153,13 +153,17 @@ if __name__ == "__main__":
     parser.add_argument('clientid', help='CLient ID -- Need to make an App in Twitch Developers: https://glass.twitch.tv/console/apps')
     parser.add_argument('user', help='Twitch Username')
     parser.add_argument('noOfProxies', help='Specify No. of Proxies. Max 20')
-    parser.add_argument('maxViewBotTime', help='Set a View Bt timeout to stop twitch views')
+    parser.add_argument('maxViewBotTime', help='Set a View Bt timeout to stop twitch views', action='store_true')
     args = parser.parse_args()
 
     clientid = sys.argv[1]
     user = sys.argv[2]
     noOfProxies = int(sys.argv[3])
-    maxViewBotTime = int(sys.argv[4])
+
+    #Check if there is a max time to kill the bot
+    if sys.argv[4:]:
+        maxViewBotTime = int(sys.argv[4])
+
     killTime = time.time()
 
     print("Obtaining the channel...")
