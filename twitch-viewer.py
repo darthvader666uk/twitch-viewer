@@ -71,17 +71,17 @@ def open_url(url, proxy, clientid, user):
         try:
             with requests.Session() as s:
                 response = s.head(url, proxies=proxy)
-            print("Sent HEAD request with %s" % proxy["http"])
+            print("User: "+user+" - Sent HEAD request with %s" % proxy["http"])
             print(response)
             time.sleep(5)
             check_viewers = get_viewers(clientid, user)
             print(check_viewers)
             time.sleep(5)
         except requests.exceptions.Timeout:
-            print("  Timeout error for %s" % proxy["http"])
+            print("User: "+user+" - Timeout error for %s" % proxy["http"])
         except requests.exceptions.ConnectionError:
-            print("  Connection error for %s" % proxy["http"])
-            print("  Refreshing Proxies ...")
+            print("User: "+user+" - Connection error for %s" % proxy["http"])
+            print("User: "+user+" - Refreshing Proxies ...")
             prepare_processes()
 
 
