@@ -57,7 +57,7 @@ def get_url():
         if os.name == 'nt':
             response = subprocess.Popen(["streamlink", "--http-header", "Client-ID="+clientid, "https://twitch.tv/"+user, "-j"], stdout=subprocess.PIPE).communicate()[0]
         else:
-            response = subprocess.Popen(["/home/darthvader666uk/.local/bin/streamlink", "--yes-run-as-root", "--http-header", "Client-ID="+clientid, "https://twitch.tv/"+user, "-j"], stdout=subprocess.PIPE).communicate()[0]
+            response = subprocess.Popen(["/home/darthvader666uk/.local/bin/streamlink", "--http-header", "Client-ID="+clientid, "https://twitch.tv/"+user, "-j"], stdout=subprocess.PIPE).communicate()[0]
     except subprocess.CalledProcessError:
         print ("1 - An error has occurred while trying to get the stream data. Is the channel online? Is the channel name correct?")
         sys.exit(1)
