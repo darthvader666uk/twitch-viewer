@@ -20,6 +20,7 @@ import time
 import random
 import argparse
 import logging
+import os
 from lxml.html import fromstring
 from datetime import datetime, timedelta
 
@@ -53,8 +54,10 @@ def get_proxies():
 
 def get_url():
     try:
-        response = subprocess.Popen(["streamlink", "--http-header", "Client-ID="+clientid, "https://twitch.tv/"+user, "-j"], stdout=subprocess.PIPE).communicate()[0]
-        # print(response)
+        if os.name == 'nt':
+            response = subprocess.Popen(["streamlink", "--http-header", "Client-ID="+clientid, "https://twitch.tv/"+user, "-j"], stdout=subprocess.PIPE).communicate()[0]
+        else:
+            response = subprocess.Popen(["/home/darthvader666uk/.local/bin/streamlink", "--yes-run-as-root", "--http-header", "Client-ID="+clientid, "https://twitch.tv/"+user, "-j"], stdout=subprocess.PIPE).communicate()[0]
     except subprocess.CalledProcessError:
         print ("1 - An error has occurred while trying to get the stream data. Is the channel online? Is the channel name correct?")
         sys.exit(1)
