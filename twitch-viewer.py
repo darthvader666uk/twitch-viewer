@@ -163,6 +163,8 @@ if __name__ == "__main__":
     #Check if there is a max time to kill the bot
     if sys.argv[4:]:
         maxViewBotTime = int(sys.argv[4])
+    else:
+        maxViewBotTime = 86400 #24 hours
 
     killTime = time.time()
 
