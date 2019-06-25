@@ -10,8 +10,12 @@ import random
 import argparse
 import logging
 import os
+import pwd
 from lxml.html import fromstring
 from datetime import datetime, timedelta
+
+def get_username():
+    return pwd.getpwuid( os.getuid() )[ 0 ]
 
 def get_channel(args):
     global user
@@ -44,9 +48,11 @@ def get_proxies():
 def get_url():
     try:
         if os.name == 'nt':
+            print("opening stream")
             response = subprocess.Popen(["streamlink", "--http-header", "Client-ID="+clientid, "https://twitch.tv/"+user, "-j"], stdout=subprocess.PIPE).communicate()[0]
         else:
-            response = subprocess.Popen(["/home/darthvader666uk/.local/bin/streamlink", "--http-header", "Client-ID="+clientid, "https://twitch.tv/"+user, "-j"], stdout=subprocess.PIPE).communicate()[0]
+            print("opening stream")
+            response = subprocess.Popen(["streamlink", "--http-header", "Client-ID="+clientid, "https://twitch.tv/"+user, "-j"], stdout=subprocess.PIPE).communicate()[0]
     except subprocess.CalledProcessError:
         print ("1 - An error has occurred while trying to get the stream data. Is the channel online? Is the channel name correct?")
         sys.exit(1)
@@ -61,7 +67,7 @@ def get_url():
             print ("2 - An error has occurred while trying to get the stream data. Is the channel online? Is the channel name correct?")
             print(response)
             sys.exit(1)
- 
+
     return url
 
 
@@ -97,6 +103,7 @@ def prepare_processes():
 
     for proxy in proxies:
         # Preparing the process and giving it its own proxy
+        print("opening process with proxy")
         processes.append(
             multiprocessing.Process(
                 target=open_url, kwargs={
@@ -111,12 +118,25 @@ def prepare_processes():
     print('')
 
 # THis Section is for logging and checking view count
+def get_id_for_user(user):
+    headers = {'Client-ID': clientid, 'Accept': "application/vnd.twitchtv.v5+json"}
+    url = "https://api.twitch.tv/kraken/users?login=" + user
+    r = requests.get(url, headers=headers)
+    if r.status_code != 200:
+        raise Exception("Could not get user ID calling URL {0} with headers {1} - HTTP {2} - {3}".format(url, headers, r.status_code, r.content))
+    res = r.json()
+    user_id = res['users'][0]["_id"]
+    print("Found id:" + user_id)
+    return user_id
+
 def get_viewers(clientid, user):
-    url = "https://api.twitch.tv/kraken/streams/"+user+"?client_id="+clientid
+    user_id = get_id_for_user(user)
+    url = "https://api.twitch.tv/kraken/streams/"+user_id+"?client_id="+clientid
     # print(url)
+
     r = requests.get(url)
     if r.status_code != 200:
-        raise Exception("API returned {0}".format(r.status_code))
+        raise Exception("API returned {0} : {1}".format(r.status_code, r.content))
     infos = r.json()
     stream = infos['stream']
     results = {}
@@ -181,7 +201,7 @@ if __name__ == "__main__":
 
         #If a time is set, lets kill it once times up - 300 = 5mins
         if maxViewBotTime:
-            if time.time() > killTime + maxViewBotTime : 
+            if time.time() > killTime + maxViewBotTime :
                 print("Viewbot has eneded.")
                 print("Time is %s " % time.time())
                 print("Start Time was %s " % killTime)
