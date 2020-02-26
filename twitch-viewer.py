@@ -29,7 +29,7 @@ def get_channel(args):
     processes = []
 
 def get_proxies():
-    url = 'https://free-proxy-list.net/'
+    url = 'https://free-proxy-list.net/uk-proxy.html'
     response = requests.get(url)
     parser = fromstring(response.text)
     proxies = set()
