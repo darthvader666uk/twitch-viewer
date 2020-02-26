@@ -10,12 +10,10 @@ import random
 import argparse
 import logging
 import os
-import pwd
 from lxml.html import fromstring
-from datetime import datetime, timedelta
+from datetime import date
 
-def get_username():
-    return pwd.getpwuid( os.getuid() )[ 0 ]
+proxies_file = "proxies/proxy_list.txt"
 
 def get_channel(args):
     global user
@@ -31,7 +29,7 @@ def get_channel(args):
     processes = []
 
 def get_proxies():
-    url = 'https://free-proxy-list.net/uk-proxy.html'
+    url = 'https://free-proxy-list.net/'
     response = requests.get(url)
     parser = fromstring(response.text)
     proxies = set()
@@ -42,7 +40,11 @@ def get_proxies():
             proxies.add(proxy)
             #Check if Proxies are empty
             if not proxies:
-                proxies = ['46.101.1.221:80', '68.183.220.18:80', '206.189.205.65:80']
+                try:
+                    proxies = [line.rstrip("\n") for line in open(proxies_file)]
+                except IOError as e:
+                    print("An error has occurred while trying to read the list of proxies: %s" % e.strerror)
+                    sys.exit(1)
     return proxies
 
 def get_url():
@@ -118,23 +120,24 @@ def prepare_processes():
     print('')
 
 # THis Section is for logging and checking view count
-def get_id_for_user(user):
-    headers = {'Client-ID': clientid, 'Accept': "application/vnd.twitchtv.v5+json"}
-    url = "https://api.twitch.tv/kraken/users?login=" + user
+def get_id_for_user(user, clientid):
+    headers = {'Client-ID': clientid}
+    url = "https://api.twitch.tv/helix/users?login=" + user
     r = requests.get(url, headers=headers)
     if r.status_code != 200:
         raise Exception("Could not get user ID calling URL {0} with headers {1} - HTTP {2} - {3}".format(url, headers, r.status_code, r.content))
     res = r.json()
-    user_id = res['users'][0]["_id"]
+    user_id = res["data"][0]["id"]
     print("Found id:" + user_id)
     return user_id
 
 def get_viewers(clientid, user):
-    user_id = get_id_for_user(user)
+    user_id = get_id_for_user(user, clientid)
+    headers = {'Client-ID': clientid, 'Accept': 'application/vnd.twitchtv.v5+json'}
     url = "https://api.twitch.tv/kraken/streams/"+user_id+"?client_id="+clientid
-    # print(url)
+    print(url)
 
-    r = requests.get(url)
+    r = requests.get(url, headers=headers)
     if r.status_code != 200:
         raise Exception("API returned {0} : {1}".format(r.status_code, r.content))
     infos = r.json()
@@ -152,9 +155,9 @@ def get_viewers(clientid, user):
         stream_results['Viewers'] = viewers
         results = {'online':True,'title':title,'viewers':viewers}
 
-    results['time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    results['time'] = date.today().strftime('%Y-%m-%d %H:%M:%S')
     results['stream'] = user
-    return stream_results
+    return results
 # End Logging
 
 if __name__ == "__main__":
