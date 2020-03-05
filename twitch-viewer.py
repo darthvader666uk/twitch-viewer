@@ -11,7 +11,9 @@ import argparse
 import logging
 import os
 from lxml.html import fromstring
-from datetime import datetime, timedelta
+from datetime import date
+
+proxies_file = "proxies/proxy_list.txt"
 
 def get_channel(args):
     global user
@@ -38,15 +40,21 @@ def get_proxies():
             proxies.add(proxy)
             #Check if Proxies are empty
             if not proxies:
-                proxies = ['46.101.1.221:80', '68.183.220.18:80', '206.189.205.65:80']
+                try:
+                    proxies = [line.rstrip("\n") for line in open(proxies_file)]
+                except IOError as e:
+                    print("An error has occurred while trying to read the list of proxies: %s" % e.strerror)
+                    sys.exit(1)
     return proxies
 
 def get_url():
     try:
         if os.name == 'nt':
+            print("opening stream")
             response = subprocess.Popen(["streamlink", "--http-header", "Client-ID="+clientid, "https://twitch.tv/"+user, "-j"], stdout=subprocess.PIPE).communicate()[0]
         else:
-            response = subprocess.Popen(["/home/darthvader666uk/.local/bin/streamlink", "--http-header", "Client-ID="+clientid, "https://twitch.tv/"+user, "-j"], stdout=subprocess.PIPE).communicate()[0]
+            print("opening stream")
+            response = subprocess.Popen(["streamlink", "--http-header", "Client-ID="+clientid, "https://twitch.tv/"+user, "-j"], stdout=subprocess.PIPE).communicate()[0]
     except subprocess.CalledProcessError:
         print ("1 - An error has occurred while trying to get the stream data. Is the channel online? Is the channel name correct?")
         sys.exit(1)
@@ -61,7 +69,7 @@ def get_url():
             print ("2 - An error has occurred while trying to get the stream data. Is the channel online? Is the channel name correct?")
             print(response)
             sys.exit(1)
- 
+
     return url
 
 
@@ -97,6 +105,7 @@ def prepare_processes():
 
     for proxy in proxies:
         # Preparing the process and giving it its own proxy
+        print("opening process with proxy")
         processes.append(
             multiprocessing.Process(
                 target=open_url, kwargs={
@@ -111,12 +120,26 @@ def prepare_processes():
     print('')
 
 # THis Section is for logging and checking view count
-def get_viewers(clientid, user):
-    url = "https://api.twitch.tv/kraken/streams/"+user+"?client_id="+clientid
-    # print(url)
-    r = requests.get(url)
+def get_id_for_user(user, clientid):
+    headers = {'Client-ID': clientid}
+    url = "https://api.twitch.tv/helix/users?login=" + user
+    r = requests.get(url, headers=headers)
     if r.status_code != 200:
-        raise Exception("API returned {0}".format(r.status_code))
+        raise Exception("Could not get user ID calling URL {0} with headers {1} - HTTP {2} - {3}".format(url, headers, r.status_code, r.content))
+    res = r.json()
+    user_id = res["data"][0]["id"]
+    print("Found id:" + user_id)
+    return user_id
+
+def get_viewers(clientid, user):
+    user_id = get_id_for_user(user, clientid)
+    headers = {'Client-ID': clientid, 'Accept': 'application/vnd.twitchtv.v5+json'}
+    url = "https://api.twitch.tv/kraken/streams/"+user_id+"?client_id="+clientid
+    print(url)
+
+    r = requests.get(url, headers=headers)
+    if r.status_code != 200:
+        raise Exception("API returned {0} : {1}".format(r.status_code, r.content))
     infos = r.json()
     stream = infos['stream']
     results = {}
@@ -132,9 +155,9 @@ def get_viewers(clientid, user):
         stream_results['Viewers'] = viewers
         results = {'online':True,'title':title,'viewers':viewers}
 
-    results['time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    results['time'] = date.today().strftime('%Y-%m-%d %H:%M:%S')
     results['stream'] = user
-    return stream_results
+    return results
 # End Logging
 
 if __name__ == "__main__":
@@ -181,7 +204,7 @@ if __name__ == "__main__":
 
         #If a time is set, lets kill it once times up - 300 = 5mins
         if maxViewBotTime:
-            if time.time() > killTime + maxViewBotTime : 
+            if time.time() > killTime + maxViewBotTime :
                 print("Viewbot has eneded.")
                 print("Time is %s " % time.time())
                 print("Start Time was %s " % killTime)
