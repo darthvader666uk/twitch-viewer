@@ -31,3 +31,5 @@ I have setup this script to be ran dynamically via commandline. In order to run 
 The "viewers" you get only work through proxy.  The amount of viewers you get equals to the amount of proxies specified.
 
 The application starts working within ~10 seconds, and you will get viewers within a couple minutes (it takes some time for twitch to process the connections).
+
+<a href="https://www.buymeacoffee.com/disruptthinking" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" style="height: 51px !important;width: 217px !important;" ></a>
